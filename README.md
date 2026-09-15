@@ -6,6 +6,8 @@ A Flutter product catolog app built against the free [DummyJSON] API
 
 This project uses a **three-layer architecture pattern** that contains presentation (/view), business logic (/domain) and data layer (/data) as well as an external DummyJSON REST API
 
+This architecture was chosen because it is simple and provide clear separation of responsibilities based on each layer especially for small product catalog app. 
+
 ## Features
 - Product list including thumbnails, title and price
 - Prouct detail screen containing image, price, rating
@@ -13,6 +15,8 @@ This project uses a **three-layer architecture pattern** that contains presentat
 - Loading, success, error (with retry), and empty states
 - Pull-to-refresh on the product list screen
 - Fallback mechanism for broken-image icons
+- Chip bar category filter on product list screen
+
 
 ## Tech Stack
 - Flutter / Dart
@@ -23,6 +27,7 @@ This project uses a **three-layer architecture pattern** that contains presentat
 lib/
 ├── data/
 │ ├── models/product.dart
+│ ├── models/category.dart
 │ ├── sources/product_api_source.dart
 │ ├── repositories/product_repository.dart
 │ ├── repositories/product_repository_impl.dart
@@ -39,6 +44,7 @@ lib/
 │ ├── widgets/loading_view.dart
 │ ├── widgets/error_view.dart
 │ ├── widgets/empty_view.dart
+│ ├── widgets/category_filter_bar.dart
 │ ├── theme/app_theme.dart
 │ └── theme/app_colors.dart
 └── main.dart
@@ -47,7 +53,7 @@ lib/
 - List: `GET https://dummyjson.com/products?limit=20&skip=0` 
 - Detail: `GET https://dummyjson.com/products/{id}`
 -  Search: `GET https://dummyjson.com/products/search?q=phone`
-
+- Categories: `GET https://dummyjson.com/products/categories`
 
 No API key required
 
@@ -61,3 +67,13 @@ flutter run
 ```bash
 flutter test
 ```
+Result should be "All tests passed!"
+
+## Note that:
+** The search function matches against DummyJSON's full-text index (title & description) and not only clinet-side filtering so results may not always contain only the visible text
+
+## Limitations / TODO
+- Search results are not paginated as it returns all matches in one call
+- Require network to fetch the data (no offline caching)
+- Only show the required information such as title, description, price, rating and image
+- The design interface for product detail screen could be improved in the future
