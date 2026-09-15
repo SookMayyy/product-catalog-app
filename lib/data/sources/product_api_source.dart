@@ -69,7 +69,7 @@ class ProductApiDataSource {
   }
 
   Future<List<Category>> fetchCategories() async { 
-    final uri = Uri.parse('$_baseUrl/products/ccategories');
+    final uri = Uri.parse('$_baseUrl/products/categories');
     try { 
       final response = await http.get(uri);
       if (response.statusCode == 200) { 

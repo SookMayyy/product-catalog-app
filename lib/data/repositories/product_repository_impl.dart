@@ -37,7 +37,7 @@ class ProductRepositoryImpl implements ProductRepository {
     required int limit,
     required int skip,
   }) {
-    return _dataSource.fetchProductByCategory(
+    return _dataSource.fetchProductsByCategory(
       category: category,
       limit: limit,
       skip: skip,
