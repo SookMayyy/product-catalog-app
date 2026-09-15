@@ -4,9 +4,14 @@ import 'data/sources/product_api_source.dart';
 import 'data/repositories/product_repository_impl.dart';
 import 'view/screens/product_list_screen.dart';
 import 'view/theme/app_theme.dart';
+import 'package:device_preview/device_preview.dart';
 
 void main() {
-  runApp(const ProductCatalogApp());
+  runApp(
+    DevicePreview(
+      enabled: true,
+      builder: (context) => const ProductCatalogApp(),
+    ));
 }
 
 class ProductCatalogApp extends StatelessWidget {
