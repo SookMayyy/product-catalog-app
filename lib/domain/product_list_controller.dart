@@ -1,6 +1,7 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart' hide Category;
 import '../data/models/product.dart';
+import '../data/models/category.dart';
 import '../data/repositories/product_repository.dart';
 import '../data/exceptions/api_exception.dart';
 import 'view_state.dart';
@@ -18,12 +19,26 @@ class ProductListController extends ChangeNotifier {
   bool _hasMore = true;
   bool _isLoadingMore = false;
   String _searchQuery = '';
+  String? _selectedCategory;
+  List<Category> _categories = [];
   Timer? _debounce;
 
   List<Product> get products => _products;
   ViewStatus get status => _status;
   String get errorMessage => _errorMessage;
   bool get isLoadingMore => _isLoadingMore;
+  String? get selectedCategory => _selectedCategory;
+  List<Category> get categories => _categories;
+
+  Future<void> loadCategories() async {
+    try {
+      _categories = await _repository.getCategories();
+      notifyListeners();
+    } catch (_) {
+      // Category chips are a secondary feature; if this call fails,
+      // the product list itself should still work normally.
+    }
+  }
 
   Future<void> loadInitial() async {
     _status = ViewStatus.loading;
@@ -32,9 +47,7 @@ class ProductListController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final results = _searchQuery.isEmpty
-          ? await _repository.getProducts(limit: _pageLimit, skip: 0)
-          : await _repository.searchProducts(_searchQuery);
+      final results = await _fetchPage(skip: 0);
 
       _products = results;
       _skip = results.length;
@@ -57,25 +70,46 @@ class ProductListController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final results =
-          await _repository.getProducts(limit: _pageLimit, skip: _skip);
+      final results = await _fetchPage(skip: _skip);
       _products = [..._products, ...results];
       _skip += results.length;
       _hasMore = results.length == _pageLimit;
     } catch (_) {
-      // failed loading should not change the current state
+      // Keep the current list visible; a failed "load more" shouldn't
+      // wipe out products the user is already looking at.
     }
 
     _isLoadingMore = false;
     notifyListeners();
   }
 
+  Future<List<Product>> _fetchPage({required int skip}) {
+    if (_searchQuery.isNotEmpty) {
+      return _repository.searchProducts(_searchQuery);
+    }
+    if (_selectedCategory != null) {
+      return _repository.getProductsByCategory(
+        category: _selectedCategory!,
+        limit: _pageLimit,
+        skip: skip,
+      );
+    }
+    return _repository.getProducts(limit: _pageLimit, skip: skip);
+  }
+
   void onSearchChanged(String query) {
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 500), () {
       _searchQuery = query.trim();
+      _selectedCategory = null;
       loadInitial();
     });
+  }
+
+  void filterByCategory(String? categorySlug) {
+    _searchQuery = '';
+    _selectedCategory = categorySlug;
+    loadInitial();
   }
 
   void retry() => loadInitial();
