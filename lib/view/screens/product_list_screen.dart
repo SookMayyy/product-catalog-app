@@ -5,6 +5,7 @@ import '../widgets/product_card.dart';
 import '../widgets/search_bar_widget.dart';
 import '../widgets/loading_view.dart';
 import '../widgets/error_view.dart';
+import '../widgets/category_filter_bar.dart';
 import '../widgets/empty_view.dart';
 import 'product_detail_screen.dart';
 
@@ -24,6 +25,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
   void initState() {
     super.initState();
     widget.controller.loadInitial();
+    widget.controller.loadCategories();
     _scrollController.addListener(_onScroll);
   }
 
@@ -49,6 +51,16 @@ class _ProductListScreenState extends State<ProductListScreen> {
       body: Column(
         children: [
           SearchBarWidget(onChanged: widget.controller.onSearchChanged),
+          
+          ListenableBuilder(
+            listenable: widget.controller,
+            builder: (context, _) => CategoryFilterBar(
+              categories: widget.controller.categories,
+              selectedCategory: widget.controller.selectedCategory,
+              onSelected: widget.controller.filterByCategory,
+            ),
+          ),
+          
           Expanded(
             child: ListenableBuilder(
               listenable: widget.controller,
