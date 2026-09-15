@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/product.dart';
 import '../exceptions/api_exception.dart';
+import '../models/category.dart';
 
 // Access the dummy data sources 
 class ProductApiDataSource { 
@@ -65,5 +66,37 @@ class ProductApiDataSource {
     } catch(_) { 
       throw ApiException('Network error: could not reach server');
     }
+  }
+
+  Future<List<Category>> fetchCategories() async { 
+    final uri = Uri.parse('$_baseUrl/products/ccategories');
+    try { 
+      final response = await http.get(uri);
+      if (response.statusCode == 200) { 
+        final list = jsonDecode(response.body) as List<dynamic>;
+        return list
+            .map((e) => Category.fromJson(e as Map<String, dynamic>))
+            .toList();
+      }
+      throw ApiException('Failed to load categories (status: ${response.statusCode})');
+    
+    } on ApiException { 
+      rethrow;
+    
+    } on FormatException { 
+      throw ApiException('Received invalid data from server');
+
+    } catch(_) { 
+      throw ApiException('Network error: could not reach server');
+    }
+  }
+
+  Future<List<Product>> fetchProductsByCategory({ 
+    required String category,
+    required int limit, 
+    required int skip,
+  }) async { 
+    final uri = Uri.parse('$_baseUrl/products/category/$category?limit=$limit&skip=$skip');
+    return _getProductList(uri);
   }
 }

@@ -1,4 +1,5 @@
 import '../models/product.dart';
+import '../models/category.dart';
 import '../sources/product_api_source.dart';
 import 'product_repository.dart';
 
@@ -23,5 +24,23 @@ class ProductRepositoryImpl implements ProductRepository {
   @override
   Future<Product> getProductById(int id) {
     return _dataSource.fetchProductById(id);
+  }
+
+  @override
+  Future<List<Category>> getCategories() {
+    return _dataSource.fetchCategories();
+  }
+
+  @override
+  Future<List<Product>> getProductsByCategory({
+    required String category,
+    required int limit,
+    required int skip,
+  }) {
+    return _dataSource.fetchProductByCategory(
+      category: category,
+      limit: limit,
+      skip: skip,
+    );
   }
 }
